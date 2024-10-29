@@ -6,7 +6,7 @@ public class BlitCompute : MonoBehaviour
     public Material mat;
     private RenderTexture renderTexture;
     private ComputeBuffer AgentDataBuffer;
-    private int numAgents = 1024;
+    private int numAgents = 2048;
 
     private float time = 0.0f;
 
@@ -55,7 +55,6 @@ public class BlitCompute : MonoBehaviour
         float dt = Time.time - time;
         time = Time.time;
         int kernelHandle = computeShader.FindKernel("CSMain");
-        int postProcessKernel = computeShader.FindKernel("ImageProcess");
         
         computeShader.SetFloat("_dt", dt);
         computeShader.SetTexture(kernelHandle, "Result", renderTexture);
@@ -63,16 +62,17 @@ public class BlitCompute : MonoBehaviour
         computeShader.SetInt("_width", renderTexture.width);
         computeShader.SetInt("_height", renderTexture.height);
 
+        int threadGroupsX = Mathf.CeilToInt(numAgents / 512.0f);
+        int threadGroupsY = Mathf.CeilToInt(renderTexture.height / 1.0f);
 
-        int threadGroupsX = Mathf.CeilToInt(numAgents / 1024.0f);
+        computeShader.Dispatch(kernelHandle, threadGroupsX, threadGroupsY, 1);
 
-        computeShader.Dispatch(kernelHandle, threadGroupsX, 1, 1);
-
-
+        int ImageProcessKernel = computeShader.FindKernel("ImageProcess");
         int threadGroupsX2 = Mathf.CeilToInt(renderTexture.width / 8.0f);
         int threadGroupsY2 = Mathf.CeilToInt(renderTexture.height / 8.0f);
 
-        computeShader.Dispatch(postProcessKernel, threadGroupsX2, threadGroupsY2, 1);
+        computeShader.SetTexture(ImageProcessKernel, "Result", renderTexture);
+        computeShader.Dispatch(ImageProcessKernel, threadGroupsX2, threadGroupsY2, 1);
 
     }
 
