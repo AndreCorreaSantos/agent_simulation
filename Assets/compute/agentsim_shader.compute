@@ -1,0 +1,47 @@
+#pragma kernel CSMain
+#pragma kernel ImageProcess
+
+RWStructuredBuffer<float4> AgentData;
+RWTexture2D<float4> Result;
+
+float _dt;
+
+int _width;
+int _height;
+
+
+
+// agent update loop
+[numthreads(1024,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float2 pos = AgentData[id.x].xy;
+    float2 vel = AgentData[id.x].zw;
+
+    pos += vel * _dt;
+
+    if (pos.x <= 0 || pos.x >= _width)
+    {
+        vel.x = -vel.x;
+        pos.x = clamp(pos.x, 0, _width);
+    }
+
+    if (pos.y <= 0 || pos.y >= _height)
+    {
+        vel.y = -vel.y;
+        pos.y = clamp(pos.y, 0, _height);
+    }
+
+    AgentData[id.x] = float4(pos, vel);
+    
+    Result[pos] = float4(1, 0, 0, 1);
+}
+
+[numthreads(1024,1,1)]
+void ImageProcess (uint3 id : SV_DispatchThreadID)
+{
+
+    float4 color = Result[id.xy];
+    Result[id.xy] = color;
+
+}
