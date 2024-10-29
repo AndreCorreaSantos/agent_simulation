@@ -6,8 +6,8 @@ public class BlitCompute : MonoBehaviour
     public Material mat;
     private RenderTexture renderTexture;
     private ComputeBuffer AgentDataBuffer;
-    private int numAgents = 2048;
-
+    public int numAgents = 2048;
+    public float agentRadius = 5.0f;
     private float time = 0.0f;
 
     void Start()
@@ -59,6 +59,7 @@ public class BlitCompute : MonoBehaviour
         int kernelHandle = computeShader.FindKernel("CSMain");
         
         computeShader.SetFloat("_dt", dt);
+        computeShader.SetFloat("_agentRadius", agentRadius);
         computeShader.SetTexture(kernelHandle, "Result", renderTexture);
         computeShader.SetBuffer(kernelHandle, "AgentData", AgentDataBuffer);
         computeShader.SetInt("_width", renderTexture.width);

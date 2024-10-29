@@ -9,15 +9,10 @@ float _dt;
 int _width;
 int _height;
 
+float _agentRadius;
 
-
-// agent update loop
-[numthreads(512,1,1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
+void bounceAgents(inout float2 pos,inout  float2 vel)
 {
-    float2 pos = AgentData[id.x].xy;
-    float2 vel = AgentData[id.x].zw;
-
     pos += vel * _dt;
 
     if (pos.x <= 0 || pos.x >= _width)
@@ -31,9 +26,21 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         vel.y = -vel.y;
         pos.y = clamp(pos.y, 0, _height);
     }
+}
+
+// agent update loop
+[numthreads(512,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float2 pos = AgentData[id.x].xy;
+    float2 vel = AgentData[id.x].zw;
+
+    pos += vel * _dt;
+
+    bounceAgents(pos, vel);
 
     AgentData[id.x] = float4(pos, vel);
-    
+
     Result[pos] = float4(1, 0, 0, 1);
 }
 
@@ -43,7 +50,7 @@ void ImageProcess (uint3 id : SV_DispatchThreadID)
 
     float4 color = Result[id.xy];
 
-    float fadeFactor = 0.01;
+    float fadeFactor = 0.02;
     float4 targetColor = float4(0.0,0.0,0.0, 1.0);
     color = lerp(color,targetColor, fadeFactor);
 
