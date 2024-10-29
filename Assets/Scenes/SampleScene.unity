@@ -653,7 +653,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   computeShader: {fileID: 7200000, guid: 8959624b52e5080acb0b7c2a67b4a051, type: 3}
   mat: {fileID: 2100000, guid: c49ccc7fcf5ae3363b4afc48d348de99, type: 2}
-  numAgents: 2048
+  numAgents: 4056
   agentRadius: 2
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

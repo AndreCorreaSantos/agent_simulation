@@ -8,8 +8,28 @@ float _dt;
 
 int _width;
 int _height;
-
+float _time;
 float _agentRadius;
+
+
+float2 random2(float2 st){
+    st = float2( dot(st,float2(127.1,311.7)),
+              dot(st,float2(269.5,183.3)) );
+    return -1.0 + 2.0*frac(sin(st)*43758.5453123);
+}
+
+
+float noise(float2 st) { // gradient noise
+    float2 i = floor(st);
+    float2 f = frac(st);
+
+    float2 u = f*f*(3.0-2.0*f);
+
+    return lerp( lerp( dot( random2(i + float2(0.0,0.0) ), f - float2(0.0,0.0) ),
+                     dot( random2(i + float2(1.0,0.0) ), f - float2(1.0,0.0) ), u.x),
+                lerp( dot( random2(i + float2(0.0,1.0) ), f - float2(0.0,1.0) ),
+                     dot( random2(i + float2(1.0,1.0) ), f - float2(1.0,1.0) ), u.x), u.y);
+}
 
 void bounceAgents(inout float2 pos,inout  float2 vel)
 {
@@ -35,14 +55,57 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     float2 pos = AgentData[id.x].xy;
     float2 vel = AgentData[id.x].zw;
 
-    pos += vel * _dt;
+    // Define the radius for trail detection
+    int radius = 4;
+    float2 alignmentDirection = float2(0, 0);
+    float2 separationDirection = float2(0, 0);
+    float trailWeight = 0;
+
+    // // Check nearby pixels within the specified radius for trails
+    // for (int i = -radius; i <= radius; i++)
+    // {
+    //     for (int j = -radius; j <= radius; j++)
+    //     {
+    //         int2 neighborPos = int2(pos.x + i, pos.y + j);
+    //         if (neighborPos.x >= 0 && neighborPos.x < _width && neighborPos.y >= 0 && neighborPos.y < _height)
+    //         {
+    //             // If a trail is detected at neighborPos
+    //             float4 trailValue = Result[neighborPos];
+    //             if (trailValue.r > 0.5) // Assuming red channel indicates a trail
+    //             {
+    //                 alignmentDirection += float2(i, j);
+    //                 trailWeight += 1;
+    //             }
+    //         }
+    //     }
+    // }
+
+    float2 seed = pos/200.0+ _time*0.1;
+    float2 rand2 = float2(noise(seed),noise(seed+1732.34));
+
+    vel = normalize(vel+rand2*0.1);
+
+    // if (trailWeight > 0)
+    // {
+    //     vel = normalize(vel+alignmentDirection*0.001+rand2);
+    // }
+
+    // Move and bounce agent
+    pos += vel *0.000000000000001;
 
     bounceAgents(pos, vel);
 
+    // Update agent data
     AgentData[id.x] = float4(pos, vel);
 
-    Result[pos] = float4(1, 0, 0, 1);
+    // Draw the agent at its position
+    int2 pixelPos = int2(pos.x, pos.y);
+    if (pixelPos.x >= 0 && pixelPos.x < _width && pixelPos.y >= 0 && pixelPos.y < _height)
+    {
+        Result[pixelPos] = float4(1, 0, 0, 1); // Set the pixel color to red for the agent
+    }
 }
+
 
 [numthreads(8,8,1)]
 void ImageProcess (uint3 id : SV_DispatchThreadID)
@@ -50,7 +113,7 @@ void ImageProcess (uint3 id : SV_DispatchThreadID)
 
     float4 color = Result[id.xy];
 
-    float fadeFactor = 0.02;
+    float fadeFactor = 0.2;
     float4 targetColor = float4(0.0,0.0,0.0, 1.0);
     color = lerp(color,targetColor, fadeFactor);
 

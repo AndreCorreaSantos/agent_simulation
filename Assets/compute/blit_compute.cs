@@ -6,7 +6,7 @@ public class BlitCompute : MonoBehaviour
     public Material mat;
     private RenderTexture renderTexture;
     private ComputeBuffer AgentDataBuffer;
-    public int numAgents = 2048;
+    public int numAgents = 1024;
     public float agentRadius = 5.0f;
     private float time = 0.0f;
 
@@ -39,10 +39,10 @@ public class BlitCompute : MonoBehaviour
 
         for (int i = 0; i < numAgents; i++)
         {   
-            // float posX = Random.Range(5.0f, Screen.width-5.0f);
-            // float posY = Random.Range(0, Screen.height-1.0f);
-            float posX = Screen.width/2;
-            float posY = Screen.height/2;
+            float posX = Random.Range(5.0f, Screen.width-5.0f);
+            float posY = Random.Range(0, Screen.height-1.0f);
+            // float posX = Screen.width/2;
+            // float posY = Screen.height/2;
             float speedX = Random.Range(-1f, 1f);
             float speedY = Random.Range(-1f, 1f);
 
@@ -64,6 +64,7 @@ public class BlitCompute : MonoBehaviour
         computeShader.SetBuffer(kernelHandle, "AgentData", AgentDataBuffer);
         computeShader.SetInt("_width", renderTexture.width);
         computeShader.SetInt("_height", renderTexture.height);
+        computeShader.SetFloat("_time",Time.time);
 
         int threadGroupsX = Mathf.CeilToInt(numAgents / 512.0f);
         int threadGroupsY = Mathf.CeilToInt(renderTexture.height / 1.0f);
