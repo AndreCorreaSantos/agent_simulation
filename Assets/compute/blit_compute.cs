@@ -39,8 +39,10 @@ public class BlitCompute : MonoBehaviour
 
         for (int i = 0; i < numAgents; i++)
         {   
-            float posX = Random.Range(5.0f, Screen.width-5.0f);
-            float posY = Random.Range(0, Screen.height-1.0f);
+            // float posX = Random.Range(5.0f, Screen.width-5.0f);
+            // float posY = Random.Range(0, Screen.height-1.0f);
+            float posX = Screen.width/2;
+            float posY = Screen.height/2;
             float speedX = Random.Range(-1f, 1f);
             float speedY = Random.Range(-1f, 1f);
 

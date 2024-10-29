@@ -43,9 +43,9 @@ void ImageProcess (uint3 id : SV_DispatchThreadID)
 
     float4 color = Result[id.xy];
 
-    float fadeFactor = 0.25;
+    float fadeFactor = 0.01;
     float4 targetColor = float4(0.0,0.0,0.0, 1.0);
-    color = smoothstep(color,targetColor, fadeFactor);
+    color = lerp(color,targetColor, fadeFactor);
 
     // Write the faded color back to the result
     Result[id.xy] = color;
