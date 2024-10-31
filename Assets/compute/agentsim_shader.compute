@@ -31,9 +31,41 @@ float noise(float2 st) { // gradient noise
                      dot( random2(i + float2(1.0,1.0) ), f - float2(1.0,1.0) ), u.x), u.y);
 }
 
+float2 sense(float2 pos, float2 vel)
+{   
+
+    // sample 3x3 pixels around the agent
+    int2 pixelPos = int2(pos.x, pos.y);
+    float2 newDir = float2(0, 0);
+    int counter = 0;
+    for (int i = -1; i <= 1; i++)
+    {
+        for (int j = -1; j <= 1; j++)
+        {
+            float2 currentPos = float2(pixelPos.x + i, pixelPos.y + j);
+            float2 dir = normalize(currentPos - pos);
+
+            if (dot(vel,dir) > 0)
+            {
+                if (Result[currentPos].r > 0.5)
+                {
+                    newDir += dir;
+                    counter++;
+                }
+            }
+        }
+    }
+
+    if (counter > 0)
+    {
+        newDir /= counter;
+        return normalize(newDir);
+    }
+    return vel;
+}
+
 void bounceAgents(inout float2 pos,inout  float2 vel)
 {
-    pos += vel * _dt;
 
     if (pos.x <= 0 || pos.x >= _width)
     {
@@ -80,10 +112,19 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     //     }
     // }
 
-    float2 seed = pos/200.0+ _time*0.1;
-    float2 rand2 = float2(noise(seed),noise(seed+1732.34));
+    float2 seed1 = pos/200.0+ _time*0.1;
+    float2 seed2 = pos/200.0- _time*0.1;
 
-    vel = normalize(vel+rand2*0.1);
+    float2 rand1 = float2(noise(seed1),noise(seed1+1732.34));
+    float2 rand2 = float2(noise(seed2),noise(seed2+1732.34));
+
+    float2 randPos = normalize(rand1+rand2);
+
+    float2 randi = normalize(float2(noise(id.x*1240.0),noise(id.y*12320.0+1732.34)));
+
+    // vel = sense(pos, vel);
+
+    vel = normalize(vel+randPos*0.1+randi*0.05*sin(_time+randi.x*100.0));
 
     // if (trailWeight > 0)
     // {
@@ -91,9 +132,11 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     // }
 
     // Move and bounce agent
-    pos += vel *0.000000000000001;
-
+   
+    
     bounceAgents(pos, vel);
+
+    pos += vel *_dt*0.05;
 
     // Update agent data
     AgentData[id.x] = float4(pos, vel);
@@ -113,10 +156,26 @@ void ImageProcess (uint3 id : SV_DispatchThreadID)
 
     float4 color = Result[id.xy];
 
-    float fadeFactor = 0.2;
-    float4 targetColor = float4(0.0,0.0,0.0, 1.0);
-    color = lerp(color,targetColor, fadeFactor);
+    float fadeFactor = 0.002;
+    
+    // blur the color by averaging the color of the neighboring pixels
+    float4 sum = float4(0, 0, 0, 0);
+    int count = 0;
+    int range = 1;
+    for (int i = -range; i <= range; i++)
+    {
+        for (int j = -range; j <= range; j++)
+        {
+            int2 neighborPos = int2(id.xy.x + i, id.xy.y + j);
+            if (neighborPos.x >= 0 && neighborPos.x < _width && neighborPos.y >= 0 && neighborPos.y < _height)
+            {
+                sum += Result[neighborPos];
+                count++;
+            }
+        }
+    }
+    color = sum / count;
 
     // Write the faded color back to the result
-    Result[id.xy] = color;
+    Result[id.xy] = color-fadeFactor;
 }
