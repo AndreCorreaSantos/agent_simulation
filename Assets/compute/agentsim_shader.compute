@@ -90,7 +90,7 @@ void bounceAgents(inout float2 pos,inout  float2 vel)
 }
 
 // agent update loop
-[numthreads(512,1,1)]
+[numthreads(64,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     float2 pos = AgentData[id.x].xy;
@@ -133,7 +133,7 @@ void ImageProcess (uint3 id : SV_DispatchThreadID)
 
     float4 color = Result[id.xy];
 
-    float fadeFactor = 0.01;
+    float fadeFactor = 0.005;
     
     // blur the color by averaging the color of the neighboring pixels
     float4 sum = float4(0, 0, 0, 0);

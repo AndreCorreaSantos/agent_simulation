@@ -68,7 +68,7 @@ public class BlitCompute : MonoBehaviour
         computeShader.SetInt("_height", renderTexture.height);
         computeShader.SetFloat("_time",Time.time);
 
-        int threadGroupsX = Mathf.CeilToInt(numAgents / 512.0f);
+        int threadGroupsX = Mathf.CeilToInt(numAgents / 64.0f);
         int threadGroupsY = Mathf.CeilToInt(renderTexture.height / 1.0f);
 
         computeShader.Dispatch(kernelHandle, threadGroupsX, threadGroupsY, 1);
