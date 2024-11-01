@@ -32,38 +32,43 @@ float noise(float2 st) { // gradient noise
                      dot( random2(i + float2(1.0,1.0) ), f - float2(1.0,1.0) ), u.x), u.y);
 }
 
+
+// rotate vector v by angle a
+float2 rotate(float2 v, float a)
+{
+    float s = sin(a);
+    float c = cos(a);
+    return float2(v.x * c - v.y * s, v.x * s + v.y * c);
+}
+
+
 float2 Sense(float2 pos, float2 vel)
 {
-    int2 pixelPos = int2(pos.x, pos.y);
-    float2 newDir = float2(0, 0);
-    int counter = 0;
+    // Sample points 3 pixels ahead in different directions
 
-    for (int i = -1; i <= 1; i++)
-    {
-        for (int j = -1; j <= 1; j++)
-        {
-            float2 currentPos = float2(pixelPos.x + 3.0*i, pixelPos.y + 3.0*j);
-            float2 dir = normalize(currentPos - pos);
-            
-            float dotp = dot(vel, dir);
-            if (dotp > 0)
-            {
-                if (Result[int2(currentPos)].r > 0.5)
-                {
-                    newDir += dir;
-                    counter++;
-                }
-            }
-        }
-    }
+    float angle = radians(30.0);
+    float d = 5.0;
 
-    if (counter > 0)
+    float2 vl = normalize(rotate(vel, angle) * d);
+    float2 vr = normalize(rotate(vel, -angle) * d);
+
+
+    float valL = Result[int2(pos + vl * d)].r;
+    float valC = Result[int2(pos + vel * d)].r;
+    float valR = Result[int2(pos + vr * d)].r;
+
+    // Determine which direction to turn based on the sensed values
+    if (valL > valC && valL > valR)
     {
-        newDir /= counter;
-        float lengthNewDir = length(newDir);
-        // Blend new direction with existing velocity
-        vel = normalize(lerp(vel, normalize(newDir), 0.5));
+        // Turn left if left sample is strongest
+        vel = lerp(vel,vl,valL);
     }
+    else if (valR > valC && valR > valL)
+    {
+        // Turn right if right sample is strongest
+        vel = lerp(vel,vr,valR);
+    }
+    // Keep going straight if center is strongest or values are equal
 
     return vel;
 }
@@ -128,7 +133,7 @@ void ImageProcess (uint3 id : SV_DispatchThreadID)
 
     float4 color = Result[id.xy];
 
-    float fadeFactor = 0.001;
+    float fadeFactor = 0.01;
     
     // blur the color by averaging the color of the neighboring pixels
     float4 sum = float4(0, 0, 0, 0);

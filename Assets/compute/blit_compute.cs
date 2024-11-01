@@ -45,6 +45,8 @@ public class BlitCompute : MonoBehaviour
             // float posY = Screen.height/2;
             float speedX = Random.Range(-1f, 1f);
             float speedY = Random.Range(-1f, 1f);
+            // speed outwards from center
+
 
             AgentData[i] = new Vector4(posX, posY, speedX, speedY);
         }
