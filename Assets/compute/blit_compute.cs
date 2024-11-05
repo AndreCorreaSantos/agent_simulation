@@ -41,11 +41,8 @@ public class BlitCompute : MonoBehaviour
         {   
             float posX = Random.Range(5.0f, Screen.width-5.0f);
             float posY = Random.Range(0, Screen.height-1.0f);
-            // float posX = Screen.width/2;
-            // float posY = Screen.height/2;
             float speedX = Random.Range(-1f, 1f);
             float speedY = Random.Range(-1f, 1f);
-            // speed outwards from center
 
 
             AgentData[i] = new Vector4(posX, posY, speedX, speedY);
@@ -69,9 +66,9 @@ public class BlitCompute : MonoBehaviour
         computeShader.SetFloat("_time",Time.time);
 
         int threadGroupsX = Mathf.CeilToInt(numAgents / 64.0f);
-        int threadGroupsY = Mathf.CeilToInt(renderTexture.height / 1.0f);
+        // int threadGroupsY = Mathf.CeilToInt(renderTexture.height / 1.0f);
 
-        computeShader.Dispatch(kernelHandle, threadGroupsX, threadGroupsY, 1);
+        computeShader.Dispatch(kernelHandle, threadGroupsX, 1, 1);
 
         int ImageProcessKernel = computeShader.FindKernel("ImageProcess");
         int threadGroupsX2 = Mathf.CeilToInt(renderTexture.width / 8.0f);

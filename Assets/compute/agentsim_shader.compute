@@ -46,7 +46,7 @@ float2 Sense(float2 pos, float2 vel)
 {
     // Sample points 3 pixels ahead in different directions
 
-    float angle = radians(30.0);
+    float angle = radians(45.0);
     float d = 5.0;
 
     float2 vl = normalize(rotate(vel, angle) * d);
@@ -113,7 +113,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     
     bounceAgents(pos, vel);
 
-    pos += vel *_dt;
+    pos += vel *_dt*100.0;
 
     // Update agent data
     AgentData[id.x] = float4(pos, vel);
@@ -133,7 +133,7 @@ void ImageProcess (uint3 id : SV_DispatchThreadID)
 
     float4 color = Result[id.xy];
 
-    float fadeFactor = 0.005;
+    float fadeFactor = 0.05;
     
     // blur the color by averaging the color of the neighboring pixels
     float4 sum = float4(0, 0, 0, 0);
