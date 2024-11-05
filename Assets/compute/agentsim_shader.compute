@@ -113,7 +113,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     
     bounceAgents(pos, vel);
 
-    pos += vel *_dt*0.1;
+    pos += vel *_dt;
 
     // Update agent data
     AgentData[id.x] = float4(pos, vel);
