@@ -1,4 +1,4 @@
-Cool looking Agent-sim, first attempt, 2048 agents:
+Agent-sim, first attempt, 2048 agents:
 
 e37696dd6326bc81e039539623e2bc268a491964
 
@@ -9,7 +9,7 @@ e37696dd6326bc81e039539623e2bc268a491964
 
 
 
-working physarum like simulation, 1000000 agents
+ physarum simulation, 1000000 agents
 
 
 67ad3f8ef39c564e8b5bbc98286436b671ecda3f
