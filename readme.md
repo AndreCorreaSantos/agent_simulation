@@ -1,6 +1,6 @@
 Agent-sim, first attempt, 2048 agents:
 
-e37696dd6326bc81e039539623e2bc268a491964
+
 
 ![1730237426184](image/readme/1730237426184.png)
 
@@ -9,9 +9,7 @@ e37696dd6326bc81e039539623e2bc268a491964
 
 
 
- physarum simulation, 1000000 agents
+ physarum simulation, 1000000 agents (click to play video)
 
-
-67ad3f8ef39c564e8b5bbc98286436b671ecda3f
 
 [![Watch the video](https://img.youtube.com/vi/1omWpSHy2mE/maxresdefault.jpg)](https://youtu.be/1omWpSHy2mE)
